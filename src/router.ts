@@ -17,6 +17,7 @@ export const appRouter = router({
           profileImage: { filename: string; imageType: string };
           coverImage: { filename: string; imageType: string };
           status: { following: number; follower: number };
+          badges: { label: string; image: string }[];
         };
         searchUserByNickname: {
           id: string;
@@ -26,6 +27,7 @@ export const appRouter = router({
           profileImage: { filename: string; imageType: string };
           coverImage: { filename: string; imageType: string };
           status: { following: number; follower: number };
+          badges: { label: string; image: string }[];
         };
         searchProjects: {
           total: number;
@@ -112,7 +114,68 @@ export const appRouter = router({
         coverImage?: string;
         followers: number;
         followings: number;
+        badges: { label: string; image: string }[];
       }[] = [];
+
+      const isSameUser =
+        data.searchUserByUsername &&
+        data.searchUserByNickname &&
+        data.searchUserByUsername.id === data.searchUserByNickname.id;
+
+      const badgeDataPromises = [];
+
+      if (data.searchUserByUsername)
+        badgeDataPromises.push(
+          graphql<{
+            userContestPrizes: {
+              contest: { name: string };
+              badgeText: string;
+              prizeImageData: { path: string };
+            }[];
+          }>(
+            `query ($id: String) {
+        userContestPrizes(id: $id) {
+          contest {
+            name
+          }
+          badgeText
+          prizeImageData {
+            path
+          }
+        }
+      }
+      `,
+            { id: data.searchUserByUsername.id },
+          ),
+        );
+      if (!isSameUser && data.searchUserByNickname)
+        badgeDataPromises.push(
+          graphql<{
+            userContestPrizes: {
+              contest: { name: string };
+              badgeText: string;
+              prizeImageData: { path: string };
+            }[];
+          }>(
+            `query ($id: String) {
+          userContestPrizes(id: $id) {
+            contest {
+              name
+            }
+            badgeText
+            prizeImageData {
+              path
+            }
+          }
+        }
+        `,
+            { id: data.searchUserByNickname.id },
+          ),
+        );
+
+      const [usernameBadgeData, nicknameBadgeData] = await Promise.all(
+        badgeDataPromises,
+      );
 
       if (data.searchUserByUsername) {
         const user = data.searchUserByUsername;
@@ -140,8 +203,13 @@ export const appRouter = router({
             : undefined,
           followers: user.status.follower,
           followings: user.status.following,
+          badges: usernameBadgeData.userContestPrizes.map((prize) => ({
+            label: `${prize.contest.name} - ${prize.badgeText}`,
+            image: `https://playentry.org${prize.prizeImageData.path}`,
+          })),
         });
-      } else if (data.searchUserByNickname) {
+      }
+      if (!isSameUser && data.searchUserByNickname) {
         const user = data.searchUserByNickname;
 
         users.push({
@@ -167,6 +235,10 @@ export const appRouter = router({
             : undefined,
           followers: user.status.follower,
           followings: user.status.following,
+          badges: nicknameBadgeData.userContestPrizes.map((prize) => ({
+            label: `${prize.contest.name} - ${prize.badgeText}`,
+            image: `https://playentry.org${prize.prizeImageData.path}`,
+          })),
         });
       }
 
