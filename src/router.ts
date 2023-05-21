@@ -32,6 +32,7 @@ export const appRouter = router({
         searchProjects: {
           total: number;
           list: {
+            id: string;
             name: string;
             ranked: boolean;
             user: {
@@ -42,6 +43,9 @@ export const appRouter = router({
             };
             thumb: string;
             updated: string;
+            visit: number;
+            likeCnt: number;
+            comment: number;
           }[];
           searchAfter: [number, number, number];
         };
@@ -86,6 +90,7 @@ export const appRouter = router({
         searchProjects: projectList(query: $query, pageParam: { sorts: ["_score", "likeCnt"], display: $display }, searchType: "scroll") {
           total
           list {
+            id
             name
             user {
               id
@@ -97,7 +102,11 @@ export const appRouter = router({
               }
             }
             thumb
+            category
             updated
+            visit
+            likeCnt
+            comment
           }
           searchAfter
         }
@@ -253,6 +262,7 @@ export const appRouter = router({
         total: number;
         searchAfter: [number, number, number];
         list: {
+          id: string;
           name: string;
           user: {
             id: string;
@@ -262,28 +272,35 @@ export const appRouter = router({
           };
           thumb: string;
           updated: string;
+          views: number;
+          likes: number;
+          comments: number;
         }[];
       } = {
         total: data.searchProjects.total,
         searchAfter: data.searchProjects.searchAfter,
-        list: data.searchProjects.list.map((item) => {
+        list: data.searchProjects.list.map((project) => {
           return {
-            name: item.name,
+            id: project.id,
+            name: project.name,
             user: {
-              id: item.user.id,
-              username: item.user.username,
-              nickname: item.user.nickname,
-              profileImage: item.user.profileImage
-                ? `https://playentry.org/uploads/${item.user.profileImage?.filename?.slice(
+              id: project.user.id,
+              username: project.user.username,
+              nickname: project.user.nickname,
+              profileImage: project.user.profileImage
+                ? `https://playentry.org/uploads/${project.user.profileImage?.filename?.slice(
                     0,
                     2,
-                  )}/${item.user.profileImage?.filename?.slice(2, 4)}/${
-                    item.user.profileImage?.filename
-                  }.${item.user.profileImage?.imageType}`
+                  )}/${project.user.profileImage?.filename?.slice(2, 4)}/${
+                    project.user.profileImage?.filename
+                  }.${project.user.profileImage?.imageType}`
                 : 'https://playentry.org/img/DefaultCardUserThmb.svg',
             },
-            thumb: `https://playentry.org${item.thumb}`,
-            updated: item.updated,
+            thumb: `https://playentry.org${project.thumb}`,
+            updated: project.updated,
+            views: project.visit,
+            likes: project.likeCnt,
+            comments: project.comment,
           };
         }),
       };
