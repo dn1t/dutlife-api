@@ -270,7 +270,7 @@ export const appRouter = router({
             nickname: string;
             profileImage: string;
           };
-          thumb: string;
+          thumb?: string;
           updated: string;
           views: number;
           likes: number;
@@ -296,7 +296,13 @@ export const appRouter = router({
                   }.${project.user.profileImage?.imageType}`
                 : 'https://playentry.org/img/DefaultCardUserThmb.svg',
             },
-            thumb: `https://playentry.org${project.thumb}`,
+            thumb: project.thumb
+              ? `https://playentry.org${
+                  project.thumb.startsWith('/')
+                    ? project.thumb
+                    : `/${project.thumb}`
+                }`
+              : undefined,
             updated: project.updated,
             views: project.visit,
             likes: project.likeCnt,
