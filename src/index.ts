@@ -1,5 +1,6 @@
 import './fetch.ts';
 import { load } from 'dotenv';
+import { serve } from 'http';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 import { AppRouter, appRouter } from './router.ts';
 import { getTokens } from './utils/tokens.ts';
@@ -20,4 +21,4 @@ const port = parseInt(Deno.env.get('PORT') ?? '4000');
 
 await getTokens();
 
-Deno.serve({ port }, handler);
+serve(handler, { port });
