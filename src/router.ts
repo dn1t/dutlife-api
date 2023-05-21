@@ -9,9 +9,25 @@ export const appRouter = router({
     .input(z.object({ query: z.string() }))
     .query(async ({ input: { query } }) => {
       const data = await graphql<{
-        idByUsername: { id: string };
-        idByNickname: { id: string };
-        projectList: {
+        searchUserByUsername: {
+          id: string;
+          username: string;
+          nickname: string;
+          description: string;
+          profileImage: { filename: string; imageType: string };
+          coverImage: { filename: string; imageType: string };
+          status: { following: number; follower: number };
+        };
+        searchUserByNickname: {
+          id: string;
+          username: string;
+          nickname: string;
+          description: string;
+          profileImage: { filename: string; imageType: string };
+          coverImage: { filename: string; imageType: string };
+          status: { following: number; follower: number };
+        };
+        searchProjects: {
           total: number;
           list: {
             name: string;
@@ -20,10 +36,7 @@ export const appRouter = router({
               id: string;
               username: string;
               nickname: string;
-              profileImage: {
-                filename: string;
-                imageType: string;
-              };
+              profileImage: { filename: string; imageType: string };
             };
             thumb: string;
             updated: string;
@@ -32,13 +45,43 @@ export const appRouter = router({
         };
       }>(
         `query ($query: String, $display: Int) {
-        idByUsername: user(username: $query) {
+        searchUserByUsername: user(username: $query) {
           id
+          username
+          nickname
+          description
+          profileImage {
+            filename
+            imageType
+          }
+          coverImage {
+            filename
+            imageType
+          }
+          status {
+            following
+            follower
+          }
         }
-        idByNickname: user(nickname: $query) {
+        searchUserByNickname: user(nickname: $query) {
           id
+          username
+          nickname
+          description
+          profileImage {
+            filename
+            imageType
+          }
+          coverImage {
+            filename
+            imageType
+          }
+          status {
+            following
+            follower
+          }
         }
-        projectList(query: $query, pageParam: { sorts: ["_score", "likeCnt"], display: $display }, searchType: "scroll") {
+        searchProjects: projectList(query: $query, pageParam: { sorts: ["_score", "likeCnt"], display: $display }, searchType: "scroll") {
           total
           list {
             name
@@ -60,18 +103,84 @@ export const appRouter = router({
         { query, display: 16 },
       );
 
-      return {
-        total: data.projectList.total,
-        list: data.projectList.list.map((item) => {
-          const hasProfileImage = !!item.user.profileImage;
+      const users: {
+        id: string;
+        username: string;
+        nickname: string;
+        description: string;
+        profileImage?: string;
+        coverImage?: string;
+        followers: number;
+        followings: number;
+      }[] = [];
 
+      if (data.searchUserByUsername) {
+        const user = data.searchUserByUsername;
+
+        users.push({
+          id: user.id,
+          username: user.username,
+          nickname: user.nickname,
+          description: user.description,
+          profileImage: user.profileImage
+            ? `https://playentry.org/uploads/${user.profileImage?.filename?.slice(
+                0,
+                2,
+              )}/${user.profileImage?.filename?.slice(2, 4)}/${
+                user.profileImage?.filename
+              }.${user.profileImage?.imageType}`
+            : undefined,
+          coverImage: user.coverImage
+            ? `https://playentry.org/uploads/${user.coverImage?.filename?.slice(
+                0,
+                2,
+              )}/${user.coverImage?.filename?.slice(2, 4)}/${
+                user.coverImage?.filename
+              }.${user.coverImage?.imageType}`
+            : undefined,
+          followers: user.status.follower,
+          followings: user.status.following,
+        });
+      } else if (data.searchUserByNickname) {
+        const user = data.searchUserByNickname;
+
+        users.push({
+          id: user.id,
+          username: user.username,
+          nickname: user.nickname,
+          description: user.description,
+          profileImage: user.profileImage
+            ? `https://playentry.org/uploads/${user.profileImage?.filename?.slice(
+                0,
+                2,
+              )}/${user.profileImage?.filename?.slice(2, 4)}/${
+                user.profileImage?.filename
+              }.${user.profileImage?.imageType}`
+            : undefined,
+          coverImage: user.coverImage
+            ? `https://playentry.org/uploads/${user.coverImage?.filename?.slice(
+                0,
+                2,
+              )}/${user.coverImage?.filename?.slice(2, 4)}/${
+                user.coverImage?.filename
+              }.${user.coverImage?.imageType}`
+            : undefined,
+          followers: user.status.follower,
+          followings: user.status.following,
+        });
+      }
+
+      const projects = {
+        total: data.searchProjects.total,
+        searchAfter: data.searchProjects.searchAfter,
+        list: data.searchProjects.list.map((item) => {
           return {
             name: item.name,
             user: {
               id: item.user.id,
               username: item.user.username,
               nickname: item.user.nickname,
-              profileImage: hasProfileImage
+              profileImage: item.user.profileImage
                 ? `https://playentry.org/uploads/${item.user.profileImage?.filename?.slice(
                     0,
                     2,
@@ -84,7 +193,11 @@ export const appRouter = router({
             updated: item.updated,
           };
         }),
-        searchAfter: data.projectList.searchAfter,
+      };
+
+      return {
+        users,
+        projects,
       };
     }),
 });

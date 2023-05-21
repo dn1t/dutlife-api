@@ -1,10 +1,11 @@
 {
   "imports": {
-    "@trpc/server": "https://esm.sh/@trpc/server",
-    "zod": "https://esm.sh/zod",
+    "@trpc/server": "https://esm.sh/@trpc/server@10.27.1",
+    "@trpc/server/": "https://esm.sh/@trpc/server@10.27.1/",
     "deno-dom": "https://deno.land/x/deno_dom@v0.1.35-alpha/deno-dom-wasm.ts",
     "dotenv": "https://deno.land/std@0.188.0/dotenv/mod.ts",
     "fetch-cookie": "https://esm.sh/fetch-cookie@2.1.0",
-    "tough-cookie": "https://esm.sh/tough-cookie@4.1.2"
+    "tough-cookie": "https://esm.sh/tough-cookie@4.1.2",
+    "zod": "https://esm.sh/zod@3.21.4"
   }
 }
