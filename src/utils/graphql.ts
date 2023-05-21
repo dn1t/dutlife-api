@@ -1,5 +1,5 @@
-import { getTokens } from '~/utils/tokens.ts';
-import type { Data } from '~/types.d.ts';
+import { getTokens } from './tokens.ts';
+import type { Data } from '../types.d.ts';
 
 export async function graphql<T>(query: string, variables: Data): Promise<T> {
   const tokens = await getTokens();

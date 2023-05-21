@@ -1,6 +1,6 @@
-import { initTRPC } from 'npm:@trpc/server';
-import z from 'npm:zod';
-import { graphql } from '~/utils/graphql.ts';
+import { initTRPC } from '@trpc/server';
+import z from 'zod';
+import { graphql } from './utils/graphql.ts';
 
 const { procedure, router } = initTRPC.create();
 

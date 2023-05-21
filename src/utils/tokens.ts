@@ -1,4 +1,4 @@
-import type { Tokens } from '~/types.d.ts';
+import type { Tokens } from '../types.d.ts';
 
 const tokens: Tokens = {};
 
