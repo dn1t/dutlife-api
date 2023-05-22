@@ -6,7 +6,7 @@ const { procedure, router } = initTRPC.create();
 
 export const appRouter = router({
   search: procedure
-    .input(z.object({ query: z.string(), display: z.number().nullable() }))
+    .input(z.object({ query: z.string(), display: z.number() }))
     .query(async ({ input: { query, display } }) => {
       const data = await graphql<{
         searchUserByUsername: {
@@ -187,7 +187,7 @@ export const appRouter = router({
           searchAfter
         }
       }`,
-        { query, display: display ?? 16 },
+        { query, display },
       );
 
       console.log(data);
