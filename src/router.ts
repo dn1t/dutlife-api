@@ -407,7 +407,7 @@ export const appRouter = router({
           views: number;
           likes: number;
           comments: number;
-          bestComment: {
+          bestComment?: {
             id: string;
             content: string;
             user: {
@@ -445,27 +445,29 @@ export const appRouter = router({
             views: discuss.visit,
             likes: discuss.likesLength,
             comments: discuss.commentsLength,
-            bestComment: {
-              id: discuss.bestComment.id,
-              content: discuss.bestComment.content,
-              user: {
-                id: discuss.bestComment.user.id,
-                username: discuss.bestComment.user.username,
-                nickname: discuss.bestComment.user.nickname,
-                profileImage: discuss.bestComment.user.profileImage
-                  ? `https://playentry.org/uploads/${discuss.bestComment.user.profileImage?.filename?.slice(
-                      0,
-                      2,
-                    )}/${discuss.bestComment.user.profileImage?.filename?.slice(
-                      2,
-                      4,
-                    )}/${discuss.bestComment.user.profileImage?.filename}.${
-                      discuss.bestComment.user.profileImage?.imageType
-                    }`
-                  : undefined,
-              },
-              likes: discuss.bestComment.likesLength,
-            },
+            bestComment: discuss.bestComment
+              ? {
+                  id: discuss.bestComment.id,
+                  content: discuss.bestComment.content,
+                  user: {
+                    id: discuss.bestComment.user.id,
+                    username: discuss.bestComment.user.username,
+                    nickname: discuss.bestComment.user.nickname,
+                    profileImage: discuss.bestComment.user.profileImage
+                      ? `https://playentry.org/uploads/${discuss.bestComment.user.profileImage?.filename?.slice(
+                          0,
+                          2,
+                        )}/${discuss.bestComment.user.profileImage?.filename?.slice(
+                          2,
+                          4,
+                        )}/${discuss.bestComment.user.profileImage?.filename}.${
+                          discuss.bestComment.user.profileImage?.imageType
+                        }`
+                      : undefined,
+                  },
+                  likes: discuss.bestComment.likesLength,
+                }
+              : undefined,
           };
         }),
       };
