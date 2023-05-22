@@ -6,8 +6,8 @@ const { procedure, router } = initTRPC.create();
 
 export const appRouter = router({
   search: procedure
-    .input(z.object({ query: z.string() }))
-    .query(async ({ input: { query } }) => {
+    .input(z.object({ query: z.string(), display: z.number().nullable() }))
+    .query(async ({ input: { query, display } }) => {
       const data = await graphql<{
         searchUserByUsername: {
           id: string;
@@ -49,6 +49,37 @@ export const appRouter = router({
           }[];
           searchAfter: [number, number, number];
         };
+        searchDiscuss: {
+          total: number;
+          list: {
+            id: string;
+            title: string;
+            content: string;
+            user: {
+              id: string;
+              username: string;
+              nickname: string;
+              profileImage: { filename: string; imageType: string };
+            };
+            category: string;
+            created: string;
+            visit: number;
+            likesLength: number;
+            commentsLength: number;
+            bestComment: {
+              id: string;
+              content: string;
+              user: {
+                id: string;
+                username: string;
+                nickname: string;
+                profileImage: { filename: string; imageType: string };
+              };
+              likesLength: number;
+            };
+          }[];
+          searchAfter: [number, number, number];
+        };
       }>(
         `query ($query: String, $display: Int) {
         searchUserByUsername: user(username: $query) {
@@ -87,7 +118,11 @@ export const appRouter = router({
             follower
           }
         }
-        searchProjects: projectList(query: $query, pageParam: { sorts: ["_score", "likeCnt"], display: $display }, searchType: "scroll") {
+        searchProjects: projectList(
+          query: $query
+          pageParam: { sorts: ["_score", "likeCnt"], display: $display }
+          searchType: "scroll"
+        ) {
           total
           list {
             id
@@ -110,9 +145,52 @@ export const appRouter = router({
           }
           searchAfter
         }
+        searchDiscuss: discussList(
+          pageParam: { sort: "score", display: $display }
+          query: $query
+          searchType: "scroll"
+        ) {
+          total
+          list {
+            id
+            title
+            content
+            user {
+              id
+              username
+              nickname
+              profileImage {
+                filename
+                imageType
+              }
+            }
+            category
+            created
+            visit
+            likesLength
+            commentsLength
+            bestComment {
+              id
+              content
+              user {
+                id
+                username
+                nickname
+                profileImage {
+                  filename
+                  imageType
+                }
+              }
+              likesLength
+            }
+          }
+          searchAfter
+        }
       }`,
-        { query, display: 16 },
+        { query, display: display ?? 16 },
       );
+
+      console.log(data);
 
       const users: {
         id: string;
@@ -268,7 +346,7 @@ export const appRouter = router({
             id: string;
             username: string;
             nickname: string;
-            profileImage: string;
+            profileImage?: string;
           };
           thumb?: string;
           updated: string;
@@ -294,7 +372,7 @@ export const appRouter = router({
                   )}/${project.user.profileImage?.filename?.slice(2, 4)}/${
                     project.user.profileImage?.filename
                   }.${project.user.profileImage?.imageType}`
-                : 'https://playentry.org/img/DefaultCardUserThmb.svg',
+                : undefined,
             },
             thumb: project.thumb
               ? `https://playentry.org${
@@ -311,9 +389,91 @@ export const appRouter = router({
         }),
       };
 
+      const discuss: {
+        total: number;
+        searchAfter: [number, number, number];
+        list: {
+          id: string;
+          title: string;
+          content: string;
+          user: {
+            id: string;
+            username: string;
+            nickname: string;
+            profileImage?: string;
+          };
+          category: string;
+          created: string;
+          views: number;
+          likes: number;
+          comments: number;
+          bestComment: {
+            id: string;
+            content: string;
+            user: {
+              id: string;
+              username: string;
+              nickname: string;
+              profileImage?: string;
+            };
+            likes: number;
+          };
+        }[];
+      } = {
+        total: data.searchDiscuss.total,
+        searchAfter: data.searchDiscuss.searchAfter,
+        list: data.searchDiscuss.list.map((discuss) => {
+          return {
+            id: discuss.id,
+            title: discuss.title,
+            content: discuss.content,
+            user: {
+              id: discuss.user.id,
+              username: discuss.user.username,
+              nickname: discuss.user.nickname,
+              profileImage: discuss.user.profileImage
+                ? `https://playentry.org/uploads/${discuss.user.profileImage?.filename?.slice(
+                    0,
+                    2,
+                  )}/${discuss.user.profileImage?.filename?.slice(2, 4)}/${
+                    discuss.user.profileImage?.filename
+                  }.${discuss.user.profileImage?.imageType}`
+                : undefined,
+            },
+            category: discuss.category,
+            created: discuss.created,
+            views: discuss.visit,
+            likes: discuss.likesLength,
+            comments: discuss.commentsLength,
+            bestComment: {
+              id: discuss.bestComment.id,
+              content: discuss.bestComment.content,
+              user: {
+                id: discuss.bestComment.user.id,
+                username: discuss.bestComment.user.username,
+                nickname: discuss.bestComment.user.nickname,
+                profileImage: discuss.bestComment.user.profileImage
+                  ? `https://playentry.org/uploads/${discuss.bestComment.user.profileImage?.filename?.slice(
+                      0,
+                      2,
+                    )}/${discuss.bestComment.user.profileImage?.filename?.slice(
+                      2,
+                      4,
+                    )}/${discuss.bestComment.user.profileImage?.filename}.${
+                      discuss.bestComment.user.profileImage?.imageType
+                    }`
+                  : undefined,
+              },
+              likes: discuss.bestComment.likesLength,
+            },
+          };
+        }),
+      };
+
       return {
         users,
         projects,
+        discuss,
       };
     }),
 });
