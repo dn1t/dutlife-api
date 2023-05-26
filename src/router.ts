@@ -16,6 +16,7 @@ export const appRouter = router({
           description: string;
           profileImage: { filename: string; imageType: string };
           coverImage: { filename: string; imageType: string };
+          role: string;
           status: { following: number; follower: number };
           badges: { label: string; image: string }[];
         };
@@ -26,6 +27,7 @@ export const appRouter = router({
           description: string;
           profileImage: { filename: string; imageType: string };
           coverImage: { filename: string; imageType: string };
+          role: string;
           status: { following: number; follower: number };
           badges: { label: string; image: string }[];
         };
@@ -95,6 +97,7 @@ export const appRouter = router({
             filename
             imageType
           }
+          role
           status {
             following
             follower
@@ -113,6 +116,7 @@ export const appRouter = router({
             filename
             imageType
           }
+          role
           status {
             following
             follower
@@ -197,6 +201,7 @@ export const appRouter = router({
         description: string;
         profileImage?: string;
         coverImage?: string;
+        role: string;
         followers: number;
         followings: number;
         badges: { label: string; image: string }[];
@@ -291,6 +296,7 @@ export const appRouter = router({
                 user.coverImage?.filename
               }.${user.coverImage?.imageType}`
             : undefined,
+          role: user.role,
           followers: user.status.follower,
           followings: user.status.following,
           badges:
@@ -324,6 +330,7 @@ export const appRouter = router({
                 user.coverImage?.filename
               }.${user.coverImage?.imageType}`
             : undefined,
+          role: user.role,
           followers: user.status.follower,
           followings: user.status.following,
           badges:
@@ -487,6 +494,7 @@ export const appRouter = router({
           description: string;
           profileImage: { filename: string; imageType: string };
           coverImage: { filename: string; imageType: string };
+          role: string;
           status: { following: number; follower: number };
           badges: { label: string; image: string }[];
         };
@@ -505,6 +513,7 @@ export const appRouter = router({
             filename
             imageType
           }
+          role
           status {
             following
             follower
@@ -543,6 +552,7 @@ export const appRouter = router({
         description: string;
         profileImage?: string;
         coverImage?: string;
+        role: string;
         followers: number;
         followings: number;
         badges: { label: string; image: string }[];
@@ -567,6 +577,7 @@ export const appRouter = router({
               data.getUserInfo.coverImage?.filename
             }.${data.getUserInfo.coverImage?.imageType}`
           : undefined,
+        role: data.getUserInfo.role,
         followers: data.getUserInfo.status.follower,
         followings: data.getUserInfo.status.following,
         badges:
