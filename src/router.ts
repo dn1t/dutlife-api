@@ -514,7 +514,69 @@ export const appRouter = router({
         { username },
       );
 
-      return data.getUserInfo;
+      const badgeData = await graphql<{
+        userContestPrizes: {
+          contest: { name: string };
+          badgeText: string;
+          bannerImageData: { path: string };
+        }[];
+      }>(
+        `query ($id: String!) {
+        userContestPrizes(id: $id) {
+          contest {
+            name
+          }
+          badgeText
+          bannerImageData {
+            path
+          }
+        }
+      }
+      `,
+        { id: data.getUserInfo.id },
+      );
+
+      const user: {
+        id: string;
+        username: string;
+        nickname: string;
+        description: string;
+        profileImage?: string;
+        coverImage?: string;
+        followers: number;
+        followings: number;
+        badges: { label: string; image: string }[];
+      } = {
+        id: data.getUserInfo.id,
+        username: data.getUserInfo.username,
+        nickname: data.getUserInfo.nickname,
+        description: data.getUserInfo.description,
+        profileImage: data.getUserInfo.profileImage
+          ? `https://playentry.org/uploads/${data.getUserInfo.profileImage?.filename?.slice(
+              0,
+              2,
+            )}/${data.getUserInfo.profileImage?.filename?.slice(2, 4)}/${
+              data.getUserInfo.profileImage?.filename
+            }.${data.getUserInfo.profileImage?.imageType}`
+          : undefined,
+        coverImage: data.getUserInfo.coverImage
+          ? `https://playentry.org/uploads/${data.getUserInfo.coverImage?.filename?.slice(
+              0,
+              2,
+            )}/${data.getUserInfo.coverImage?.filename?.slice(2, 4)}/${
+              data.getUserInfo.coverImage?.filename
+            }.${data.getUserInfo.coverImage?.imageType}`
+          : undefined,
+        followers: data.getUserInfo.status.follower,
+        followings: data.getUserInfo.status.following,
+        badges:
+          badgeData.userContestPrizes.map((prize) => ({
+            label: `${prize.contest.name} - ${prize.badgeText}`,
+            image: `https://playentry.org/uploads${prize.bannerImageData.path}`,
+          })) ?? [],
+      };
+
+      return user;
     }),
 });
 
