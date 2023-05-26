@@ -190,8 +190,6 @@ export const appRouter = router({
         { query, display },
       );
 
-      console.log(data);
-
       const users: {
         id: string;
         username: string;
@@ -477,6 +475,46 @@ export const appRouter = router({
         projects,
         discuss,
       };
+    }),
+  userInfo: procedure
+    .input(z.object({ username: z.string() }))
+    .query(async ({ input: { username } }) => {
+      const data = await graphql<{
+        getUserInfo: {
+          id: string;
+          username: string;
+          nickname: string;
+          description: string;
+          profileImage: { filename: string; imageType: string };
+          coverImage: { filename: string; imageType: string };
+          status: { following: number; follower: number };
+          badges: { label: string; image: string }[];
+        };
+      }>(
+        `query ($username: String) {
+        getUserInfo: user(username: $username) {
+          id
+          username
+          nickname
+          description
+          profileImage {
+            filename
+            imageType
+          }
+          coverImage {
+            filename
+            imageType
+          }
+          status {
+            following
+            follower
+          }
+        }
+      }`,
+        { username },
+      );
+
+      return data.getUserInfo;
     }),
 });
 
