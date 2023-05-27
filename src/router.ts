@@ -522,7 +522,7 @@ export const appRouter = router({
             views: project.visit,
             likes: project.likeCnt,
             comments: project.comment,
-            favorites: project.favorite,
+            bookmarks: project.favorite,
           })),
         });
       }
