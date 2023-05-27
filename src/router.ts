@@ -17,7 +17,12 @@ export const appRouter = router({
           profileImage: { filename: string; imageType: string };
           coverImage: { filename: string; imageType: string };
           role: string;
-          status: { following: number; follower: number; project: number };
+          status: {
+            following: number;
+            follower: number;
+            project: number;
+            projectAll: number;
+          };
         };
         searchUserByNickname: {
           id: string;
@@ -27,7 +32,12 @@ export const appRouter = router({
           profileImage: { filename: string; imageType: string };
           coverImage: { filename: string; imageType: string };
           role: string;
-          status: { following: number; follower: number; project: number };
+          status: {
+            following: number;
+            follower: number;
+            project: number;
+            projectAll: number;
+          };
         };
         searchProjects: {
           total: number;
@@ -102,6 +112,7 @@ export const appRouter = router({
             following
             follower
             project
+            projectAll
           }
         }
         searchUserByNickname: user(nickname: $query) {
@@ -122,6 +133,7 @@ export const appRouter = router({
             following
             follower
             project
+            projectAll
           }
         }
         searchProjects: projectList(
@@ -209,6 +221,7 @@ export const appRouter = router({
         followers: number;
         followings: number;
         badges: { label: string; image: string }[];
+        privateProjects: number;
         projects: {
           id: string;
           name: string;
@@ -405,6 +418,7 @@ export const appRouter = router({
               label: `${prize.contest.name} - ${prize.badgeText}`,
               image: `https://playentry.org/uploads${prize.bannerImageData.path}`,
             })) ?? [],
+          privateProjects: user.status.projectAll - user.status.project,
           projects: usernameData2.getUserProjects.list.map((project) => ({
             id: project.id,
             name: project.name,
@@ -457,6 +471,7 @@ export const appRouter = router({
               label: `${prize.contest.name} - ${prize.badgeText}`,
               image: `https://playentry.org/uploads${prize.bannerImageData.path}`,
             })) ?? [],
+          privateProjects: user.status.projectAll - user.status.project,
           projects: nicknameData2.getUserProjects.list.map((project) => ({
             id: project.id,
             name: project.name,
@@ -638,7 +653,12 @@ export const appRouter = router({
           profileImage: { filename: string; imageType: string };
           coverImage: { filename: string; imageType: string };
           role: string;
-          status: { following: number; follower: number; project: number };
+          status: {
+            following: number;
+            follower: number;
+            project: number;
+            projectAll: number;
+          };
           badges: { label: string; image: string }[];
         };
       }>(
@@ -661,6 +681,7 @@ export const appRouter = router({
             following
             follower
             project
+            projectAll
           }
         }
       }`,
@@ -733,6 +754,7 @@ export const appRouter = router({
         followers: number;
         followings: number;
         badges: { label: string; image: string }[];
+        privateProjects: number;
         projects: {
           id: string;
           name: string;
@@ -774,6 +796,8 @@ export const appRouter = router({
             label: `${prize.contest.name} - ${prize.badgeText}`,
             image: `https://playentry.org/uploads${prize.bannerImageData.path}`,
           })) ?? [],
+        privateProjects:
+          data.getUserInfo.status.projectAll - data.getUserInfo.status.project,
         projects: data2.getUserProjects.list.map((project) => ({
           id: project.id,
           name: project.name,
