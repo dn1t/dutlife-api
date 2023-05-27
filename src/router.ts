@@ -220,6 +220,7 @@ export const appRouter = router({
           views: number;
           likes: number;
           comments: number;
+          favorites: number;
         }[];
       }[] = [];
 
@@ -228,7 +229,7 @@ export const appRouter = router({
         data.searchUserByNickname &&
         data.searchUserByUsername.id === data.searchUserByNickname.id;
 
-      const badgeDataPromises: (
+      const data2Promises: (
         | Promise<{
             getUserBadges: {
               contest: { name: string };
@@ -247,14 +248,15 @@ export const appRouter = router({
                 visit: number;
                 likeCnt: number;
                 comment: number;
+                favorite: number;
               }[];
             };
           }>
         | Promise<undefined>
       )[] = [Promise.resolve(undefined), Promise.resolve(undefined)];
 
-      if (data.searchUserByUsername)
-        badgeDataPromises[0] = graphql<{
+      if (data.searchUserByUsername) {
+        data2Promises[0] = graphql<{
           getUserBadges: {
             contest: { name: string };
             badgeText: string;
@@ -272,6 +274,7 @@ export const appRouter = router({
               visit: number;
               likeCnt: number;
               comment: number;
+              favorite: number;
             }[];
           };
         }>(
@@ -311,8 +314,9 @@ export const appRouter = router({
             projects: data.searchUserByUsername.status.project,
           },
         );
+      }
       if (!isSameUser && data.searchUserByNickname)
-        badgeDataPromises[1] = graphql<{
+        data2Promises[1] = graphql<{
           getUserBadges: {
             contest: { name: string };
             badgeText: string;
@@ -330,6 +334,7 @@ export const appRouter = router({
               visit: number;
               likeCnt: number;
               comment: number;
+              favorite: number;
             }[];
           };
         }>(
@@ -370,12 +375,31 @@ export const appRouter = router({
           },
         );
 
-      const [usernameData2, nicknameData2] = await Promise.all(
-        badgeDataPromises,
-      );
+      const [usernameData2, nicknameData2] = await Promise.all(data2Promises);
 
       if (data.searchUserByUsername && usernameData2) {
         const user = data.searchUserByUsername;
+
+        const data3 = await graphql<{ [key: string]: { favorite: number } }>(
+          `query {
+          ${usernameData2.getUserProjects.list
+            .map(
+              (project) => `p${project.id}: project(id: "${project.id}") {
+            favorite
+          }`,
+            )
+            .join('\n        ')}
+        }`,
+          {},
+        );
+
+        Object.entries(data3).forEach(([key, { favorite }]) => {
+          const project = usernameData2.getUserProjects.list.find(
+            (project) => project.id === key.slice(1),
+          );
+          if (!project) return;
+          project.favorite = favorite;
+        });
 
         users.push({
           id: user.id,
@@ -423,11 +447,33 @@ export const appRouter = router({
             views: project.visit,
             likes: project.likeCnt,
             comments: project.comment,
+            favorites: project.favorite,
           })),
         });
       }
       if (!isSameUser && data.searchUserByNickname && nicknameData2) {
         const user = data.searchUserByNickname;
+
+        const data3 = await graphql<{ [key: string]: { favorite: number } }>(
+          `query {
+          ${nicknameData2.getUserProjects.list
+            .map(
+              (project) => `p${project.id}: project(id: "${project.id}") {
+            favorite
+          }`,
+            )
+            .join('\n        ')}
+        }`,
+          {},
+        );
+
+        Object.entries(data3).forEach(([key, { favorite }]) => {
+          const project = nicknameData2.getUserProjects.list.find(
+            (project) => project.id === key.slice(1),
+          );
+          if (!project) return;
+          project.favorite = favorite;
+        });
 
         users.push({
           id: user.id,
@@ -476,6 +522,7 @@ export const appRouter = router({
             views: project.visit,
             likes: project.likeCnt,
             comments: project.comment,
+            favorites: project.favorite,
           })),
         });
       }
@@ -687,6 +734,7 @@ export const appRouter = router({
             visit: number;
             likeCnt: number;
             comment: number;
+            favorite: number;
           }[];
         };
       }>(
@@ -724,6 +772,27 @@ export const appRouter = router({
         { id: data.getUserInfo.id, projects: data.getUserInfo.status.project },
       );
 
+      const data3 = await graphql<{ [key: string]: { favorite: number } }>(
+        `query {
+        ${data2.getUserProjects.list
+          .map(
+            (project) => `p${project.id}: project(id: "${project.id}") {
+          favorite
+        }`,
+          )
+          .join('\n        ')}
+      }`,
+        {},
+      );
+
+      Object.entries(data3).forEach(([key, { favorite }]) => {
+        const project = data2.getUserProjects.list.find(
+          (project) => project.id === key.slice(1),
+        );
+        if (!project) return;
+        project.favorite = favorite;
+      });
+
       const user: {
         id: string;
         username: string;
@@ -746,6 +815,7 @@ export const appRouter = router({
           views: number;
           likes: number;
           comments: number;
+          favorites: number;
         }[];
       } = {
         id: data.getUserInfo.id,
@@ -793,6 +863,7 @@ export const appRouter = router({
           views: project.visit,
           likes: project.likeCnt,
           comments: project.comment,
+          favorites: project.favorite,
         })),
       };
 
