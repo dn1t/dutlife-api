@@ -17,6 +17,7 @@ export const appRouter = router({
           profileImage: { filename: string; imageType: string };
           coverImage: { filename: string; imageType: string };
           role: string;
+          created: string;
           status: {
             following: number;
             follower: number;
@@ -32,6 +33,7 @@ export const appRouter = router({
           profileImage: { filename: string; imageType: string };
           coverImage: { filename: string; imageType: string };
           role: string;
+          created: string;
           status: {
             following: number;
             follower: number;
@@ -108,6 +110,7 @@ export const appRouter = router({
             imageType
           }
           role
+          created
           status {
             following
             follower
@@ -129,6 +132,7 @@ export const appRouter = router({
             imageType
           }
           role
+          created
           status {
             following
             follower
@@ -218,6 +222,7 @@ export const appRouter = router({
         profileImage?: string;
         coverImage?: string;
         role: string;
+        joined: string;
         followers: number;
         followings: number;
         badges: { label: string; image: string }[];
@@ -411,6 +416,7 @@ export const appRouter = router({
               }.${user.coverImage?.imageType}`
             : undefined,
           role: user.role,
+          joined: user.created,
           followers: user.status.follower,
           followings: user.status.following,
           badges:
@@ -464,6 +470,7 @@ export const appRouter = router({
               }.${user.coverImage?.imageType}`
             : undefined,
           role: user.role,
+          joined: user.created,
           followers: user.status.follower,
           followings: user.status.following,
           badges:
@@ -653,6 +660,7 @@ export const appRouter = router({
           profileImage: { filename: string; imageType: string };
           coverImage: { filename: string; imageType: string };
           role: string;
+          created: string;
           status: {
             following: number;
             follower: number;
@@ -677,6 +685,7 @@ export const appRouter = router({
             imageType
           }
           role
+          created
           status {
             following
             follower
@@ -751,6 +760,7 @@ export const appRouter = router({
         profileImage?: string;
         coverImage?: string;
         role: string;
+        joined: string;
         followers: number;
         followings: number;
         badges: { label: string; image: string }[];
@@ -789,6 +799,7 @@ export const appRouter = router({
             }.${data.getUserInfo.coverImage?.imageType}`
           : undefined,
         role: data.getUserInfo.role,
+        joined: data.getUserInfo.created,
         followers: data.getUserInfo.status.follower,
         followings: data.getUserInfo.status.following,
         badges:
