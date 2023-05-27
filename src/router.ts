@@ -17,8 +17,7 @@ export const appRouter = router({
           profileImage: { filename: string; imageType: string };
           coverImage: { filename: string; imageType: string };
           role: string;
-          status: { following: number; follower: number };
-          badges: { label: string; image: string }[];
+          status: { following: number; follower: number; project: number };
         };
         searchUserByNickname: {
           id: string;
@@ -28,15 +27,13 @@ export const appRouter = router({
           profileImage: { filename: string; imageType: string };
           coverImage: { filename: string; imageType: string };
           role: string;
-          status: { following: number; follower: number };
-          badges: { label: string; image: string }[];
+          status: { following: number; follower: number; project: number };
         };
         searchProjects: {
           total: number;
           list: {
             id: string;
             name: string;
-            ranked: boolean;
             user: {
               id: string;
               username: string;
@@ -44,7 +41,10 @@ export const appRouter = router({
               profileImage: { filename: string; imageType: string };
             };
             thumb: string;
+            categoryCode: string;
             updated: string;
+            staffPicked: string;
+            ranked: string;
             visit: number;
             likeCnt: number;
             comment: number;
@@ -101,6 +101,7 @@ export const appRouter = router({
           status {
             following
             follower
+            project
           }
         }
         searchUserByNickname: user(nickname: $query) {
@@ -120,6 +121,7 @@ export const appRouter = router({
           status {
             following
             follower
+            project
           }
         }
         searchProjects: projectList(
@@ -141,8 +143,10 @@ export const appRouter = router({
               }
             }
             thumb
-            category
+            categoryCode
             updated
+            staffPicked
+            ranked
             visit
             likeCnt
             comment
@@ -205,6 +209,18 @@ export const appRouter = router({
         followers: number;
         followings: number;
         badges: { label: string; image: string }[];
+        projects: {
+          id: string;
+          name: string;
+          thumb?: string;
+          category: string;
+          updated: string;
+          staffPicked: string;
+          ranked: string;
+          views: number;
+          likes: number;
+          comments: number;
+        }[];
       }[] = [];
 
       const isSameUser =
@@ -214,25 +230,53 @@ export const appRouter = router({
 
       const badgeDataPromises: (
         | Promise<{
-            userContestPrizes: {
+            getUserBadges: {
               contest: { name: string };
               badgeText: string;
               bannerImageData: { path: string };
             }[];
+            getUserProjects: {
+              list: {
+                id: string;
+                name: string;
+                thumb: string;
+                categoryCode: string;
+                updated: string;
+                staffPicked: string;
+                ranked: string;
+                visit: number;
+                likeCnt: number;
+                comment: number;
+              }[];
+            };
           }>
         | Promise<undefined>
       )[] = [Promise.resolve(undefined), Promise.resolve(undefined)];
 
       if (data.searchUserByUsername)
         badgeDataPromises[0] = graphql<{
-          userContestPrizes: {
+          getUserBadges: {
             contest: { name: string };
             badgeText: string;
             bannerImageData: { path: string };
           }[];
+          getUserProjects: {
+            list: {
+              id: string;
+              name: string;
+              thumb: string;
+              categoryCode: string;
+              updated: string;
+              staffPicked: string;
+              ranked: string;
+              visit: number;
+              likeCnt: number;
+              comment: number;
+            }[];
+          };
         }>(
-          `query ($id: String!) {
-        userContestPrizes(id: $id) {
+          `query ($id: String!, $projects: Int) {
+        getUserBadges: userContestPrizes(id: $id) {
           contest {
             name
           }
@@ -241,20 +285,56 @@ export const appRouter = router({
             path
           }
         }
+        getUserProjects: userProjectList(
+          user: $id
+          pageParam: { sort: "created", display: $projects }
+          searchType: "scroll"
+          term: "all"
+        ) {
+          list {
+            id
+            name
+            thumb
+            categoryCode
+            updated
+            staffPicked
+            ranked
+            visit
+            likeCnt
+            comment
+          }
+        }
       }
       `,
-          { id: data.searchUserByUsername.id },
+          {
+            id: data.searchUserByUsername.id,
+            projects: data.searchUserByUsername.status.project,
+          },
         );
       if (!isSameUser && data.searchUserByNickname)
         badgeDataPromises[1] = graphql<{
-          userContestPrizes: {
+          getUserBadges: {
             contest: { name: string };
             badgeText: string;
             bannerImageData: { path: string };
           }[];
+          getUserProjects: {
+            list: {
+              id: string;
+              name: string;
+              thumb: string;
+              categoryCode: string;
+              updated: string;
+              staffPicked: string;
+              ranked: string;
+              visit: number;
+              likeCnt: number;
+              comment: number;
+            }[];
+          };
         }>(
-          `query ($id: String!) {
-          userContestPrizes(id: $id) {
+          `query ($id: String!, $projects: Int) {
+          getUserBadges: userContestPrizes(id: $id) {
             contest {
               name
             }
@@ -263,16 +343,38 @@ export const appRouter = router({
               path
             }
           }
+          getUserProjects: userProjectList(
+            user: $id
+            pageParam: { sort: "created", display: $projects }
+            searchType: "scroll"
+            term: "all"
+          ) {
+            list {
+              id
+              name
+              thumb
+              categoryCode
+              updated
+              staffPicked
+              ranked
+              visit
+              likeCnt
+              comment
+            }
+          }
         }
         `,
-          { id: data.searchUserByNickname.id },
+          {
+            id: data.searchUserByNickname.id,
+            projects: data.searchUserByNickname.id,
+          },
         );
 
-      const [usernameBadgeData, nicknameBadgeData] = await Promise.all(
+      const [usernameData2, nicknameData2] = await Promise.all(
         badgeDataPromises,
       );
 
-      if (data.searchUserByUsername) {
+      if (data.searchUserByUsername && usernameData2) {
         const user = data.searchUserByUsername;
 
         users.push({
@@ -300,13 +402,31 @@ export const appRouter = router({
           followers: user.status.follower,
           followings: user.status.following,
           badges:
-            usernameBadgeData?.userContestPrizes.map((prize) => ({
+            usernameData2.getUserBadges.map((prize) => ({
               label: `${prize.contest.name} - ${prize.badgeText}`,
               image: `https://playentry.org/uploads${prize.bannerImageData.path}`,
             })) ?? [],
+          projects: usernameData2.getUserProjects.list.map((project) => ({
+            id: project.id,
+            name: project.name,
+            thumb: project.thumb
+              ? `https://playentry.org${
+                  project.thumb.startsWith('/')
+                    ? project.thumb
+                    : `/${project.thumb}`
+                }`
+              : undefined,
+            category: project.categoryCode,
+            updated: project.updated,
+            staffPicked: project.staffPicked,
+            ranked: project.ranked,
+            views: project.visit,
+            likes: project.likeCnt,
+            comments: project.comment,
+          })),
         });
       }
-      if (!isSameUser && data.searchUserByNickname) {
+      if (!isSameUser && data.searchUserByNickname && nicknameData2) {
         const user = data.searchUserByNickname;
 
         users.push({
@@ -334,10 +454,29 @@ export const appRouter = router({
           followers: user.status.follower,
           followings: user.status.following,
           badges:
-            nicknameBadgeData?.userContestPrizes.map((prize) => ({
+            nicknameData2?.getUserBadges.map((prize) => ({
               label: `${prize.contest.name} - ${prize.badgeText}`,
               image: `https://playentry.org/uploads${prize.bannerImageData.path}`,
             })) ?? [],
+
+          projects: nicknameData2.getUserProjects.list.map((project) => ({
+            id: project.id,
+            name: project.name,
+            thumb: project.thumb
+              ? `https://playentry.org${
+                  project.thumb.startsWith('/')
+                    ? project.thumb
+                    : `/${project.thumb}`
+                }`
+              : undefined,
+            category: project.categoryCode,
+            updated: project.updated,
+            staffPicked: project.staffPicked,
+            ranked: project.ranked,
+            views: project.visit,
+            likes: project.likeCnt,
+            comments: project.comment,
+          })),
         });
       }
 
@@ -354,7 +493,10 @@ export const appRouter = router({
             profileImage?: string;
           };
           thumb?: string;
+          category: string;
           updated: string;
+          staffPicked: string;
+          ranked: string;
           views: number;
           likes: number;
           comments: number;
@@ -386,7 +528,10 @@ export const appRouter = router({
                     : `/${project.thumb}`
                 }`
               : undefined,
+            category: project.categoryCode,
             updated: project.updated,
+            staffPicked: project.staffPicked,
+            ranked: project.ranked,
             views: project.visit,
             likes: project.likeCnt,
             comments: project.comment,
@@ -495,7 +640,7 @@ export const appRouter = router({
           profileImage: { filename: string; imageType: string };
           coverImage: { filename: string; imageType: string };
           role: string;
-          status: { following: number; follower: number };
+          status: { following: number; follower: number; project: number };
           badges: { label: string; image: string }[];
         };
       }>(
@@ -517,21 +662,36 @@ export const appRouter = router({
           status {
             following
             follower
+            project
           }
         }
       }`,
         { username },
       );
 
-      const badgeData = await graphql<{
-        userContestPrizes: {
+      const data2 = await graphql<{
+        getUserBadges: {
           contest: { name: string };
           badgeText: string;
           bannerImageData: { path: string };
         }[];
+        getUserProjects: {
+          list: {
+            id: string;
+            name: string;
+            thumb: string;
+            categoryCode: string;
+            updated: string;
+            staffPicked: string;
+            ranked: string;
+            visit: number;
+            likeCnt: number;
+            comment: number;
+          }[];
+        };
       }>(
-        `query ($id: String!) {
-        userContestPrizes(id: $id) {
+        `query ($id: String!, $projects: Int) {
+        getUserBadges: userContestPrizes(id: $id) {
           contest {
             name
           }
@@ -540,9 +700,28 @@ export const appRouter = router({
             path
           }
         }
+        getUserProjects: userProjectList(
+          user: $id
+          pageParam: { sort: "created", display: $projects }
+          searchType: "scroll"
+          term: "all"
+        ) {
+          list {
+            id
+            name
+            thumb
+            categoryCode
+            updated
+            staffPicked
+            ranked
+            visit
+            likeCnt
+            comment
+          }
+        }
       }
       `,
-        { id: data.getUserInfo.id },
+        { id: data.getUserInfo.id, projects: data.getUserInfo.status.project },
       );
 
       const user: {
@@ -556,6 +735,18 @@ export const appRouter = router({
         followers: number;
         followings: number;
         badges: { label: string; image: string }[];
+        projects: {
+          id: string;
+          name: string;
+          thumb?: string;
+          category: string;
+          updated: string;
+          staffPicked: string;
+          ranked: string;
+          views: number;
+          likes: number;
+          comments: number;
+        }[];
       } = {
         id: data.getUserInfo.id,
         username: data.getUserInfo.username,
@@ -581,10 +772,28 @@ export const appRouter = router({
         followers: data.getUserInfo.status.follower,
         followings: data.getUserInfo.status.following,
         badges:
-          badgeData.userContestPrizes.map((prize) => ({
+          data2.getUserBadges.map((prize) => ({
             label: `${prize.contest.name} - ${prize.badgeText}`,
             image: `https://playentry.org/uploads${prize.bannerImageData.path}`,
           })) ?? [],
+        projects: data2.getUserProjects.list.map((project) => ({
+          id: project.id,
+          name: project.name,
+          thumb: project.thumb
+            ? `https://playentry.org${
+                project.thumb.startsWith('/')
+                  ? project.thumb
+                  : `/${project.thumb}`
+              }`
+            : undefined,
+          category: project.categoryCode,
+          updated: project.updated,
+          staffPicked: project.staffPicked,
+          ranked: project.ranked,
+          views: project.visit,
+          likes: project.likeCnt,
+          comments: project.comment,
+        })),
       };
 
       return user;
