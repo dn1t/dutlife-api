@@ -220,7 +220,7 @@ export const appRouter = router({
           views: number;
           likes: number;
           comments: number;
-          favorites: number;
+          bookmarks: number;
         }[];
       }[] = [];
 
@@ -447,7 +447,7 @@ export const appRouter = router({
             views: project.visit,
             likes: project.likeCnt,
             comments: project.comment,
-            favorites: project.favorite,
+            bookmarks: project.favorite,
           })),
         });
       }
@@ -504,7 +504,6 @@ export const appRouter = router({
               label: `${prize.contest.name} - ${prize.badgeText}`,
               image: `https://playentry.org/uploads${prize.bannerImageData.path}`,
             })) ?? [],
-
           projects: nicknameData2.getUserProjects.list.map((project) => ({
             id: project.id,
             name: project.name,
@@ -815,7 +814,7 @@ export const appRouter = router({
           views: number;
           likes: number;
           comments: number;
-          favorites: number;
+          bookmarks: number;
         }[];
       } = {
         id: data.getUserInfo.id,
@@ -863,7 +862,7 @@ export const appRouter = router({
           views: project.visit,
           likes: project.likeCnt,
           comments: project.comment,
-          favorites: project.favorite,
+          bookmarks: project.favorite,
         })),
       };
 
