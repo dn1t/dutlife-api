@@ -580,7 +580,7 @@ export const appRouter = router({
           bestComment?: {
             id: string;
             content: string;
-            user: {
+            user?: {
               id: string;
               username: string;
               nickname: string;
@@ -619,22 +619,26 @@ export const appRouter = router({
               ? {
                   id: discuss.bestComment.id,
                   content: discuss.bestComment.content,
-                  user: {
-                    id: discuss.bestComment.user.id,
-                    username: discuss.bestComment.user.username,
-                    nickname: discuss.bestComment.user.nickname,
-                    profileImage: discuss.bestComment.user.profileImage
-                      ? `https://playentry.org/uploads/${discuss.bestComment.user.profileImage?.filename?.slice(
-                          0,
-                          2,
-                        )}/${discuss.bestComment.user.profileImage?.filename?.slice(
-                          2,
-                          4,
-                        )}/${discuss.bestComment.user.profileImage?.filename}.${
-                          discuss.bestComment.user.profileImage?.imageType
-                        }`
-                      : undefined,
-                  },
+                  user: discuss.bestComment.user
+                    ? {
+                        id: discuss.bestComment.user.id,
+                        username: discuss.bestComment.user.username,
+                        nickname: discuss.bestComment.user.nickname,
+                        profileImage: discuss.bestComment.user.profileImage
+                          ? `https://playentry.org/uploads/${discuss.bestComment.user.profileImage?.filename?.slice(
+                              0,
+                              2,
+                            )}/${discuss.bestComment.user.profileImage?.filename?.slice(
+                              2,
+                              4,
+                            )}/${
+                              discuss.bestComment.user.profileImage?.filename
+                            }.${
+                              discuss.bestComment.user.profileImage?.imageType
+                            }`
+                          : undefined,
+                      }
+                    : undefined,
                   likes: discuss.bestComment.likesLength,
                 }
               : undefined,
