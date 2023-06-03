@@ -238,7 +238,6 @@ export const appRouter = router({
           views: number;
           likes: number;
           comments: number;
-          bookmarks: number;
           remakes: number;
         }[];
       }[] = [];
@@ -267,7 +266,6 @@ export const appRouter = router({
                 visit: number;
                 likeCnt: number;
                 comment: number;
-                favorite: number;
                 childCnt: number;
               }[];
             };
@@ -294,7 +292,6 @@ export const appRouter = router({
               visit: number;
               likeCnt: number;
               comment: number;
-              favorite: number;
               childCnt: number;
             }[];
           };
@@ -326,7 +323,6 @@ export const appRouter = router({
             visit
             likeCnt
             comment
-            favorite
             childCnt
           }
         }
@@ -357,7 +353,6 @@ export const appRouter = router({
               visit: number;
               likeCnt: number;
               comment: number;
-              favorite: number;
               childCnt: number;
             }[];
           };
@@ -389,7 +384,6 @@ export const appRouter = router({
               visit
               likeCnt
               comment
-              favorite
               childCnt
             }
           }
@@ -454,7 +448,6 @@ export const appRouter = router({
             views: project.visit,
             likes: project.likeCnt,
             comments: project.comment,
-            bookmarks: project.favorite,
             remakes: project.childCnt,
           })),
         });
@@ -510,7 +503,6 @@ export const appRouter = router({
             views: project.visit,
             likes: project.likeCnt,
             comments: project.comment,
-            bookmarks: project.favorite,
             remakes: project.childCnt,
           })),
         });
@@ -735,7 +727,6 @@ export const appRouter = router({
             visit: number;
             likeCnt: number;
             comment: number;
-            favorite: number;
             childCnt: number;
           }[];
         };
@@ -767,7 +758,6 @@ export const appRouter = router({
             visit
             likeCnt
             comment
-            favorite
             childCnt
           }
         }
@@ -802,7 +792,6 @@ export const appRouter = router({
           views: number;
           likes: number;
           comments: number;
-          bookmarks: number;
           remakes: number;
         }[];
       } = {
@@ -854,7 +843,6 @@ export const appRouter = router({
           views: project.visit,
           likes: project.likeCnt,
           comments: project.comment,
-          bookmarks: project.favorite,
           remakes: project.childCnt,
         })),
       };
