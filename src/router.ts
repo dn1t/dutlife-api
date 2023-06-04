@@ -863,6 +863,20 @@ export const appRouter = router({
 
       return user;
     }),
+  shorten: procedure
+    .input(z.object({ url: z.string() }))
+    .query(async ({ input: { url } }) => {
+      const res = await fetch(
+        `https://me2do.naver.com/common/requestJsonpV2.nhn?svcCode=0&url=https://link.naver.com/bridge?url=${encodeURIComponent(
+          url,
+        )}`,
+        { method: 'POST', headers: { Referer: 'link.naver.com' } },
+      );
+      const data = await res.text();
+      const json = JSON.parse(data.trim().slice(1, -1));
+
+      return json.result.httpsUrl;
+    }),
 });
 
 export type AppRouter = typeof appRouter;
