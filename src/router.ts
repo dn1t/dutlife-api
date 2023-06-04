@@ -54,6 +54,7 @@ export const appRouter = router({
             };
             thumb: string;
             categoryCode: string;
+            created: string;
             updated: string;
             staffPicked: string;
             ranked: string;
@@ -160,6 +161,7 @@ export const appRouter = router({
             }
             thumb
             categoryCode
+            created
             updated
             staffPicked
             ranked
@@ -232,6 +234,7 @@ export const appRouter = router({
           name: string;
           thumb?: string;
           category: string;
+          created: string;
           updated: string;
           staffPicked: string;
           ranked: string;
@@ -260,6 +263,7 @@ export const appRouter = router({
                 name: string;
                 thumb: string;
                 categoryCode: string;
+                created: string;
                 updated: string;
                 staffPicked: string;
                 ranked: string;
@@ -286,6 +290,7 @@ export const appRouter = router({
               name: string;
               thumb: string;
               categoryCode: string;
+              created: string;
               updated: string;
               staffPicked: string;
               ranked: string;
@@ -317,6 +322,7 @@ export const appRouter = router({
             name
             thumb
             categoryCode
+            created
             updated
             staffPicked
             ranked
@@ -347,6 +353,7 @@ export const appRouter = router({
               name: string;
               thumb: string;
               categoryCode: string;
+              created: string;
               updated: string;
               staffPicked: string;
               ranked: string;
@@ -378,6 +385,7 @@ export const appRouter = router({
               name
               thumb
               categoryCode
+              created
               updated
               staffPicked
               ranked
@@ -442,6 +450,7 @@ export const appRouter = router({
                 }`
               : undefined,
             category: project.categoryCode,
+            created: project.created,
             updated: project.updated,
             staffPicked: project.staffPicked,
             ranked: project.ranked,
@@ -497,6 +506,7 @@ export const appRouter = router({
                 }`
               : undefined,
             category: project.categoryCode,
+            created: project.created,
             updated: project.updated,
             staffPicked: project.staffPicked,
             ranked: project.ranked,
@@ -721,6 +731,7 @@ export const appRouter = router({
             name: string;
             thumb: string;
             categoryCode: string;
+            created: string;
             updated: string;
             staffPicked: string;
             ranked: string;
@@ -752,6 +763,7 @@ export const appRouter = router({
             name
             thumb
             categoryCode
+            created
             updated
             staffPicked
             ranked
@@ -786,6 +798,7 @@ export const appRouter = router({
           name: string;
           thumb?: string;
           category: string;
+          created: string;
           updated: string;
           staffPicked: string;
           ranked: string;
@@ -837,6 +850,7 @@ export const appRouter = router({
               }`
             : undefined,
           category: project.categoryCode,
+          created: project.created,
           updated: project.updated,
           staffPicked: project.staffPicked,
           ranked: project.ranked,
